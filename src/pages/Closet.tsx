@@ -68,17 +68,24 @@ const Closet = () => {
   const [activeOutfitName, setActiveOutfitName] = useState('Mi Outfit');
 
   const handleItemClick = (item: typeof closetItems[0]) => {
-    const itemCategory = item.category;
+    const itemId = item.id;
     
-    // Remove any existing items of the same category
-    const filteredOutfit = activeOutfit.filter(id => {
-      const matchingItem = closetItems.find(i => i.id === id);
-      return matchingItem?.category !== itemCategory;
-    });
-    
-    // Add the new item
-    setActiveOutfit([...filteredOutfit, item.id]);
-    toast.success(`${item.name} añadido al outfit`);
+    // Toggle item - if already in outfit, remove it. If not, add it.
+    if (activeOutfit.includes(itemId)) {
+      // Remove item
+      setActiveOutfit(activeOutfit.filter(id => id !== itemId));
+      toast.info(`${item.name} quitado del outfit`);
+    } else {
+      // Add item - remove any existing items of the same category
+      const itemCategory = item.category;
+      const filteredOutfit = activeOutfit.filter(id => {
+        const matchingItem = closetItems.find(i => i.id === id);
+        return matchingItem?.category !== itemCategory;
+      });
+      
+      setActiveOutfit([...filteredOutfit, itemId]);
+      toast.success(`${item.name} añadido al outfit`);
+    }
   };
 
   const handleOutfitClick = (outfit: typeof savedOutfits[0]) => {

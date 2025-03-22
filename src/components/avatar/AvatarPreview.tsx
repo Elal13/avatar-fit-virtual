@@ -23,70 +23,151 @@ function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
 
   return (
     <group ref={group}>
-      {/* Base Avatar Mesh - Simple placeholder shape */}
-      <mesh position={[0, 0, 0]} castShadow>
+      {/* Base Avatar Mesh - More realistic human shape */}
+      <group position={[0, 0, 0]} castShadow>
         {/* Head */}
         <mesh position={[0, 1.6, 0]}>
           <sphereGeometry args={[0.25, 32, 32]} />
           <meshStandardMaterial color="#FFDBAC" />
         </mesh>
-        
-        {/* Torso */}
-        <mesh position={[0, 0.9, 0]}>
-          <cylinderGeometry args={[0.3, 0.4, 0.8, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        
-        {/* Legs */}
-        <mesh position={[-0.15, 0.2, 0]}>
-          <cylinderGeometry args={[0.12, 0.12, 1.2, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        <mesh position={[0.15, 0.2, 0]}>
-          <cylinderGeometry args={[0.12, 0.12, 1.2, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        
-        {/* Arms */}
-        <mesh position={[-0.4, 0.9, 0]} rotation={[0, 0, -0.2]}>
-          <cylinderGeometry args={[0.08, 0.08, 0.7, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        <mesh position={[0.4, 0.9, 0]} rotation={[0, 0, 0.2]}>
-          <cylinderGeometry args={[0.08, 0.08, 0.7, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-      </mesh>
 
-      {/* Clothing Items */}
-      {outfitItems.includes('shirt') && (
-        <mesh position={[0, 0.9, 0]}>
-          <cylinderGeometry args={[0.32, 0.42, 0.82, 32]} />
-          <meshStandardMaterial color="#3b82f6" transparent opacity={0.8} />
+        {/* Neck */}
+        <mesh position={[0, 1.45, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 0.15, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
         </mesh>
+        
+        {/* Torso - More human-like shape */}
+        <mesh position={[0, 1.05, 0]}>
+          <capsuleGeometry args={[0.22, 0.6, 16, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Hips */}
+        <mesh position={[0, 0.65, 0]}>
+          <capsuleGeometry args={[0.23, 0.2, 16, 32]} rotation={[Math.PI / 2, 0, 0]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Left Leg */}
+        <group position={[-0.15, 0.2, 0]}>
+          <mesh position={[0, 0.15, 0]}>
+            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.3, 0]}>
+            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.7, 0.05]}>
+            <boxGeometry args={[0.1, 0.1, 0.25]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Right Leg */}
+        <group position={[0.15, 0.2, 0]}>
+          <mesh position={[0, 0.15, 0]}>
+            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.3, 0]}>
+            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.7, 0.05]}>
+            <boxGeometry args={[0.1, 0.1, 0.25]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Left Arm */}
+        <group position={[-0.3, 1.2, 0]}>
+          <mesh position={[0, 0, 0]} rotation={[0, 0, -0.3]}>
+            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[-0.1, -0.2, 0]} rotation={[0, 0, -0.5]}>
+            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[-0.2, -0.3, 0]} rotation={[0, 0, 0]}>
+            <sphereGeometry args={[0.05, 32, 16]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Right Arm */}
+        <group position={[0.3, 1.2, 0]}>
+          <mesh position={[0, 0, 0]} rotation={[0, 0, 0.3]}>
+            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0.1, -0.2, 0]} rotation={[0, 0, 0.5]}>
+            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0.2, -0.3, 0]} rotation={[0, 0, 0]}>
+            <sphereGeometry args={[0.05, 32, 16]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Clothing Items with more realistic shapes */}
+      {outfitItems.includes('shirt') && (
+        <group position={[0, 1.05, 0]}>
+          <mesh>
+            <capsuleGeometry args={[0.23, 0.62, 16, 32]} />
+            <meshStandardMaterial color="#3b82f6" transparent opacity={0.9} />
+          </mesh>
+          {/* Sleeves */}
+          <mesh position={[-0.3, 0.15, 0]} rotation={[0, 0, -0.3]}>
+            <cylinderGeometry args={[0.07, 0.07, 0.25, 32]} />
+            <meshStandardMaterial color="#3b82f6" transparent opacity={0.9} />
+          </mesh>
+          <mesh position={[0.3, 0.15, 0]} rotation={[0, 0, 0.3]}>
+            <cylinderGeometry args={[0.07, 0.07, 0.25, 32]} />
+            <meshStandardMaterial color="#3b82f6" transparent opacity={0.9} />
+          </mesh>
+        </group>
       )}
 
       {outfitItems.includes('pants') && (
         <group position={[0, 0.2, 0]}>
-          <mesh position={[-0.15, 0, 0]}>
-            <cylinderGeometry args={[0.14, 0.14, 1.2, 32]} />
-            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.8} />
+          {/* Hip part */}
+          <mesh position={[0, 0.45, 0]}>
+            <capsuleGeometry args={[0.24, 0.22, 16, 32]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
           </mesh>
-          <mesh position={[0.15, 0, 0]}>
-            <cylinderGeometry args={[0.14, 0.14, 1.2, 32]} />
-            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.8} />
+          {/* Legs */}
+          <mesh position={[-0.15, 0.15, 0]}>
+            <capsuleGeometry args={[0.1, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
+          </mesh>
+          <mesh position={[-0.15, -0.3, 0]}>
+            <capsuleGeometry args={[0.09, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
+          </mesh>
+          <mesh position={[0.15, 0.15, 0]}>
+            <capsuleGeometry args={[0.1, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
+          </mesh>
+          <mesh position={[0.15, -0.3, 0]}>
+            <capsuleGeometry args={[0.09, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
           </mesh>
         </group>
       )}
 
       {outfitItems.includes('shoes') && (
-        <group position={[0, -0.4, 0]}>
+        <group position={[0, -0.7, 0]}>
           <mesh position={[-0.15, 0, 0.05]}>
-            <boxGeometry args={[0.2, 0.1, 0.3]} />
+            <boxGeometry args={[0.12, 0.12, 0.3]} />
             <meshStandardMaterial color="#111827" />
           </mesh>
           <mesh position={[0.15, 0, 0.05]}>
-            <boxGeometry args={[0.2, 0.1, 0.3]} />
+            <boxGeometry args={[0.12, 0.12, 0.3]} />
             <meshStandardMaterial color="#111827" />
           </mesh>
         </group>
@@ -128,7 +209,7 @@ function Scene({ outfitItems = [] }: { outfitItems: string[] }) {
         shadow-mapSize-width={1024} 
         shadow-mapSize-height={1024}
       />
-      <PerspectiveCamera makeDefault position={[0, 0.8, 3]} fov={40} />
+      <PerspectiveCamera makeDefault position={[0, 0.5, 2.7]} fov={40} />
       <OrbitControls 
         enablePan={false}
         minPolarAngle={Math.PI / 4}
