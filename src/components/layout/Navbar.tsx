@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UserMenu } from './UserMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function Navbar() {
@@ -91,14 +92,6 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-700 hover:text-avatar-500 hover:bg-avatar-50 rounded-full"
-            aria-label="Account"
-          >
-            <User className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
             className="text-gray-700 hover:text-avatar-500 hover:bg-avatar-50 rounded-full relative"
             aria-label="Cart"
             asChild
@@ -110,9 +103,7 @@ export function Navbar() {
               </span>
             </Link>
           </Button>
-          <Button asChild className="bg-avatar-600 hover:bg-avatar-700 rounded-lg ml-4">
-            <Link to="/login">Iniciar Sesión</Link>
-          </Button>
+          <UserMenu />
         </div>
 
         <div className="md:hidden flex items-center">
@@ -159,23 +150,7 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-6 border-t border-gray-100">
-              <Button
-                className="w-full bg-avatar-600 hover:bg-avatar-700 justify-center"
-                asChild
-              >
-                <Link to="/login" onClick={closeMobileMenu}>
-                  Iniciar Sesión
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full mt-4 border-avatar-600 text-avatar-600 hover:bg-avatar-50 justify-center"
-                asChild
-              >
-                <Link to="/signup" onClick={closeMobileMenu}>
-                  Registrarse
-                </Link>
-              </Button>
+              <UserMenu />
             </div>
           </nav>
         </div>

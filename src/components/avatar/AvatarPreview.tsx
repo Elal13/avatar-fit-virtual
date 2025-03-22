@@ -1,5 +1,8 @@
 
 import { useState, useEffect, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, PerspectiveCamera } from '@react-three/drei';
+import * as THREE from 'three';
 
 interface AvatarPreviewProps {
   className?: string;
@@ -7,15 +10,140 @@ interface AvatarPreviewProps {
   isRotating?: boolean;
 }
 
+// Avatar Model component
+function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
+  const group = useRef<THREE.Group>(null);
+  
+  // Rotate the avatar
+  useFrame((state) => {
+    if (group.current) {
+      group.current.rotation.y = state.clock.getElapsedTime() * 0.15;
+    }
+  });
+
+  return (
+    <group ref={group}>
+      {/* Base Avatar Mesh - Simple placeholder shape */}
+      <mesh position={[0, 0, 0]} castShadow>
+        {/* Head */}
+        <mesh position={[0, 1.6, 0]}>
+          <sphereGeometry args={[0.25, 32, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Torso */}
+        <mesh position={[0, 0.9, 0]}>
+          <cylinderGeometry args={[0.3, 0.4, 0.8, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Legs */}
+        <mesh position={[-0.15, 0.2, 0]}>
+          <cylinderGeometry args={[0.12, 0.12, 1.2, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        <mesh position={[0.15, 0.2, 0]}>
+          <cylinderGeometry args={[0.12, 0.12, 1.2, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Arms */}
+        <mesh position={[-0.4, 0.9, 0]} rotation={[0, 0, -0.2]}>
+          <cylinderGeometry args={[0.08, 0.08, 0.7, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        <mesh position={[0.4, 0.9, 0]} rotation={[0, 0, 0.2]}>
+          <cylinderGeometry args={[0.08, 0.08, 0.7, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+      </mesh>
+
+      {/* Clothing Items */}
+      {outfitItems.includes('shirt') && (
+        <mesh position={[0, 0.9, 0]}>
+          <cylinderGeometry args={[0.32, 0.42, 0.82, 32]} />
+          <meshStandardMaterial color="#3b82f6" transparent opacity={0.8} />
+        </mesh>
+      )}
+
+      {outfitItems.includes('pants') && (
+        <group position={[0, 0.2, 0]}>
+          <mesh position={[-0.15, 0, 0]}>
+            <cylinderGeometry args={[0.14, 0.14, 1.2, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.8} />
+          </mesh>
+          <mesh position={[0.15, 0, 0]}>
+            <cylinderGeometry args={[0.14, 0.14, 1.2, 32]} />
+            <meshStandardMaterial color="#1e3a8a" transparent opacity={0.8} />
+          </mesh>
+        </group>
+      )}
+
+      {outfitItems.includes('shoes') && (
+        <group position={[0, -0.4, 0]}>
+          <mesh position={[-0.15, 0, 0.05]}>
+            <boxGeometry args={[0.2, 0.1, 0.3]} />
+            <meshStandardMaterial color="#111827" />
+          </mesh>
+          <mesh position={[0.15, 0, 0.05]}>
+            <boxGeometry args={[0.2, 0.1, 0.3]} />
+            <meshStandardMaterial color="#111827" />
+          </mesh>
+        </group>
+      )}
+
+      {outfitItems.includes('glasses') && (
+        <group position={[0, 1.6, 0.15]}>
+          <mesh>
+            <boxGeometry args={[0.36, 0.06, 0.04]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          <mesh position={[-0.15, 0, 0.05]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          <mesh position={[0.15, 0, 0.05]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+        </group>
+      )}
+    </group>
+  );
+}
+
+// Scene setup with lights and controls
+function Scene({ outfitItems = [] }: { outfitItems: string[] }) {
+  return (
+    <>
+      <ambientLight intensity={0.6} />
+      <directionalLight 
+        position={[10, 10, 5]} 
+        intensity={1} 
+        castShadow 
+        shadow-mapSize-width={1024} 
+        shadow-mapSize-height={1024}
+      />
+      <PerspectiveCamera makeDefault position={[0, 0.8, 3]} fov={40} />
+      <OrbitControls 
+        enablePan={false}
+        minPolarAngle={Math.PI / 4}
+        maxPolarAngle={Math.PI / 1.8}
+        minDistance={2}
+        maxDistance={5}
+      />
+      <AvatarModel outfitItems={outfitItems} />
+    </>
+  );
+}
+
 export function AvatarPreview({ 
   className = "", 
   outfitItems = [], 
   isRotating = true 
 }: AvatarPreviewProps) {
-  const canvasRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
 
-  // In a real implementation, this would initialize a 3D scene with Three.js or similar
   useEffect(() => {
     // Simulate loading the 3D avatar
     const timer = setTimeout(() => {
@@ -34,47 +162,17 @@ export function AvatarPreview({
           <div className="h-12 w-12 rounded-full border-4 border-avatar-200 border-t-avatar-600 animate-spin" />
         </div>
       ) : (
-        <>
-          <div 
-            ref={canvasRef} 
-            className="h-full w-full flex items-center justify-center"
-          >
-            {/* Placeholder for the actual 3D avatar implementation */}
-            <div className="relative w-64 h-96 md:w-80 md:h-[450px] bg-gradient-to-b from-avatar-50 to-avatar-100 rounded-xl flex items-center justify-center overflow-hidden">
-              {/* Avatar silhouette */}
-              <svg 
-                className={`w-56 h-80 text-avatar-900/10 transition-transform duration-300 ease-in-out ${isRotating ? 'animate-float' : ''}`}
-                viewBox="0 0 24 24" 
-                fill="currentColor"
-              >
-                <path d="M12 2c2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4 1.79-4 4-4zm0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z" />
-              </svg>
-              
-              {/* Example clothing items rendered on avatar */}
-              {outfitItems.includes('shirt') && (
-                <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 w-40 h-20 bg-avatar-500/20 rounded-lg"></div>
-              )}
-              {outfitItems.includes('pants') && (
-                <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 w-32 h-28 bg-avatar-700/20 rounded-lg"></div>
-              )}
-              {outfitItems.includes('shoes') && (
-                <div className="absolute bottom-[8%] left-1/2 transform -translate-x-1/2 w-28 h-10 bg-avatar-900/20 rounded-lg"></div>
-              )}
-              {outfitItems.includes('glasses') && (
-                <div className="absolute top-[20%] left-1/2 transform -translate-x-1/2 w-24 h-6 bg-avatar-400/20 rounded-lg"></div>
-              )}
-              
-              <div className="absolute bottom-4 right-4 bg-black/20 backdrop-blur-md text-white text-xs px-2 py-1 rounded-full">
-                Vista previa 3D
-              </div>
-            </div>
-          </div>
-          <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-2 rounded-full shadow-sm flex items-center">
-            <span className="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
-            Avatar Activo
-          </div>
-        </>
+        <Canvas shadows style={{ height: '100%', width: '100%' }}>
+          <Scene outfitItems={outfitItems} />
+        </Canvas>
       )}
+      <div className="absolute bottom-4 right-4 bg-black/20 backdrop-blur-md text-white text-xs px-2 py-1 rounded-full">
+        Vista previa 3D
+      </div>
+      <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-2 rounded-full shadow-sm flex items-center">
+        <span className="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
+        Avatar Activo
+      </div>
     </div>
   );
 }
