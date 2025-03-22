@@ -19,7 +19,7 @@ const customizationOptions = [
 
 export function AvatarCustomizer() {
   const [activeTab, setActiveTab] = useState('body');
-  const [activeOutfitItems, setActiveOutfitItems] = useState<string[]>([]);
+  const [activeOutfitItems, setActiveOutfitItems] = useState([]);
   
   // Example measurement values
   const [measurements, setMeasurements] = useState({
@@ -30,7 +30,7 @@ export function AvatarCustomizer() {
     hips: 95,
   });
 
-  const handleMeasurementChange = (type: keyof typeof measurements, value: number[]) => {
+  const handleMeasurementChange = (type, value) => {
     setMeasurements(prev => ({
       ...prev,
       [type]: value[0]

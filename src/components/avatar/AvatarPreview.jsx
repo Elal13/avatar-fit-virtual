@@ -4,15 +4,9 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
-interface AvatarPreviewProps {
-  className?: string;
-  outfitItems?: string[];
-  isRotating?: boolean;
-}
-
 // Avatar Model component
-function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
-  const group = useRef<THREE.Group>(null);
+function AvatarModel({ outfitItems = [] }) {
+  const group = useRef(null);
   
   // Rotate the avatar
   useFrame((state) => {
@@ -198,7 +192,7 @@ function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
 }
 
 // Scene setup with lights and controls
-function Scene({ outfitItems = [] }: { outfitItems: string[] }) {
+function Scene({ outfitItems = [] }) {
   return (
     <>
       <ambientLight intensity={0.6} />
@@ -226,7 +220,7 @@ export function AvatarPreview({
   className = "", 
   outfitItems = [], 
   isRotating = true 
-}: AvatarPreviewProps) {
+}) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 // Simulate authentication state
 const useAuth = () => {
   // In a real app, this would check localStorage, cookies, or a context
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Establecemos isLoggedIn como true por defecto
   
   const login = () => {
     setIsLoggedIn(true);
