@@ -99,12 +99,16 @@ function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
             <meshStandardMaterial color="#000000" />
           </mesh>
           <mesh position={[-0.15, 0, 0.05]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} rotation={[Math.PI / 2, 0, 0]} />
-            <meshStandardMaterial color="#000000" />
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} />
+              <meshStandardMaterial color="#000000" />
+            </mesh>
           </mesh>
           <mesh position={[0.15, 0, 0.05]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} rotation={[Math.PI / 2, 0, 0]} />
-            <meshStandardMaterial color="#000000" />
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.04, 32]} />
+              <meshStandardMaterial color="#000000" />
+            </mesh>
           </mesh>
         </group>
       )}
