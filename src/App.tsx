@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,25 +12,30 @@ import Avatar from "./pages/Avatar";
 import Closet from "./pages/Closet";
 import Cart from "./pages/Cart";
 
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner position="top-right" closeButton={true} />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/avatar" element={<Avatar />} />
-          <Route path="/closet" element={<Closet />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="top-right" closeButton={true} />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/avatar" element={<Avatar />} />
+              <Route path="/closet" element={<Closet />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+}
 
 export default App;
