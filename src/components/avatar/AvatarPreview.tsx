@@ -44,8 +44,8 @@ function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
         </mesh>
         
         {/* Hips */}
-        <mesh position={[0, 0.65, 0]}>
-          <capsuleGeometry args={[0.23, 0.2, 16, 32]} rotation={[Math.PI / 2, 0, 0]} />
+        <mesh position={[0, 0.65, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <capsuleGeometry args={[0.23, 0.2, 16, 32]} />
           <meshStandardMaterial color="#FFDBAC" />
         </mesh>
         
@@ -136,8 +136,8 @@ function AvatarModel({ outfitItems = [] }: { outfitItems: string[] }) {
       {outfitItems.includes('pants') && (
         <group position={[0, 0.2, 0]}>
           {/* Hip part */}
-          <mesh position={[0, 0.45, 0]}>
-            <capsuleGeometry args={[0.24, 0.22, 16, 32]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh position={[0, 0.45, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <capsuleGeometry args={[0.24, 0.22, 16, 32]} />
             <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
           </mesh>
           {/* Legs */}
