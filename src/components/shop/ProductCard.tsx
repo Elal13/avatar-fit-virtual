@@ -21,9 +21,10 @@ export interface Product {
 interface ProductCardProps {
   product: Product;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function ProductCard({ product, className = "" }: ProductCardProps) {
+export function ProductCard({ product, className = "", style }: ProductCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -45,6 +46,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       className={`group block overflow-hidden rounded-xl bg-white border border-gray-200 transition-all duration-300 hover:shadow-avatar ${className}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      style={style}
     >
       <div className="relative overflow-hidden aspect-[3/4] bg-gray-100">
         {!imageLoaded && (
