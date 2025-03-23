@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { HTMLAttributes } from 'react';
 
 export type Product = {
   id: string;
@@ -20,7 +21,11 @@ export type Product = {
   quantity?: number;
 };
 
-export function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps extends HTMLAttributes<HTMLDivElement> {
+  product: Product;
+}
+
+export function ProductCard({ product, className, ...props }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCart();
 
@@ -36,9 +41,10 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <div 
-      className="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md"
+      className={`group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md ${className || ''}`}
       onMouseEnter={() => setIsHovered(true)} 
       onMouseLeave={() => setIsHovered(false)}
+      {...props}
     >
       <div className="relative h-60 overflow-hidden">
         <img 
