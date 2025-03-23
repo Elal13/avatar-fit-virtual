@@ -8,12 +8,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Shop from "./pages/Shop";
-import Avatar from "./pages/Avatar";
 import Closet from "./pages/Closet";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
 import History from "./pages/History";
+import Terms from "./pages/Terms";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -25,16 +25,16 @@ function App() {
         <BrowserRouter>
           <TooltipProvider>
             <Toaster />
-            <Sonner position="top-right" closeButton={true} />
+            <Sonner position="bottom-right" closeButton={true} />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/shop" element={<Shop />} />
-              <Route path="/avatar" element={<Avatar />} />
               <Route path="/closet" element={<Closet />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/history" element={<History />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

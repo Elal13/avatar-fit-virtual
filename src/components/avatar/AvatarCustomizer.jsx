@@ -85,6 +85,7 @@ export function AvatarCustomizer() {
                     min={140} 
                     step={1}
                     onValueChange={(value) => handleMeasurementChange('height', value)}
+                    className="mx-auto max-w-[90%]"
                   />
                 </div>
                 
@@ -99,6 +100,7 @@ export function AvatarCustomizer() {
                     min={40} 
                     step={1} 
                     onValueChange={(value) => handleMeasurementChange('weight', value)}
+                    className="mx-auto max-w-[90%]"
                   />
                 </div>
                 
@@ -113,6 +115,7 @@ export function AvatarCustomizer() {
                     min={70} 
                     step={1} 
                     onValueChange={(value) => handleMeasurementChange('chest', value)}
+                    className="mx-auto max-w-[90%]"
                   />
                 </div>
                 
@@ -127,11 +130,12 @@ export function AvatarCustomizer() {
                     min={60} 
                     step={1}
                     onValueChange={(value) => handleMeasurementChange('waist', value)}
+                    className="mx-auto max-w-[90%]"
                   />
                 </div>
               </TabsContent>
               
-              <TabsContent value="face" className="space-y-3 mt-0">
+              <TabsContent value="face" className="space-y-3 mt-0 flex flex-col items-center">
                 <p className="text-sm text-gray-500">Personaliza las características faciales de tu avatar</p>
                 <div className="p-8 rounded-lg bg-gray-50 flex items-center justify-center">
                   <span className="text-3xl">😊</span>
@@ -140,12 +144,12 @@ export function AvatarCustomizer() {
               </TabsContent>
               
               <TabsContent value="hair" className="space-y-3 mt-0">
-                <p className="text-sm text-gray-500">Selecciona el estilo y color de cabello</p>
-                <div className="grid grid-cols-4 gap-2">
+                <p className="text-sm text-gray-500 text-center mb-3">Selecciona el estilo y color de cabello</p>
+                <div className="grid grid-cols-4 gap-2 max-w-[90%] mx-auto">
                   {['🧑', '👩‍🦱', '👨‍🦰', '👩‍🦳', '👨‍🦳', '👨‍🦲', '👱‍♀️', '👱‍♂️'].map((style, index) => (
                     <button 
                       key={index}
-                      className="p-3 rounded-lg border border-gray-200 hover:border-avatar-400 hover:bg-avatar-50 transition-colors"
+                      className="p-3 rounded-lg border border-gray-200 hover:border-avatar-400 hover:bg-avatar-50 transition-colors flex items-center justify-center"
                     >
                       <span className="text-2xl">{style}</span>
                     </button>
@@ -154,8 +158,8 @@ export function AvatarCustomizer() {
               </TabsContent>
               
               <TabsContent value="skin" className="space-y-3 mt-0">
-                <p className="text-sm text-gray-500">Elige el tono de piel</p>
-                <div className="grid grid-cols-5 gap-2">
+                <p className="text-sm text-gray-500 text-center mb-3">Elige el tono de piel</p>
+                <div className="grid grid-cols-5 gap-2 max-w-[80%] mx-auto">
                   {['#FFDBAC', '#F1C27D', '#E0AC69', '#C68642', '#8D5524'].map((color, index) => (
                     <button 
                       key={index}
@@ -168,15 +172,15 @@ export function AvatarCustomizer() {
               </TabsContent>
             </div>
             
-            <div className="p-5 pt-0">
+            <div className="p-5 pt-0 flex justify-center">
               <Button 
-                className="w-full bg-avatar-600 hover:bg-avatar-700"
+                className="w-3/4 mx-auto bg-avatar-600 hover:bg-avatar-700"
                 onClick={() => setActiveOutfitItems(['shirt', 'pants', 'shoes'])}
               >
                 Guardar Avatar
               </Button>
               
-              <div className="mt-4">
+              <div className="mt-4 w-full">
                 <p className="text-xs text-gray-500 text-center">
                   Tu avatar se usará para probar las prendas en la tienda
                 </p>

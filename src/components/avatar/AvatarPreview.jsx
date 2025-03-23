@@ -37,9 +37,9 @@ function AvatarModel({ outfitItems = [] }) {
           <meshStandardMaterial color="#FFDBAC" />
         </mesh>
         
-        {/* Hips */}
+        {/* Hips - Fixed TypeScript error by moving rotation to mesh */}
         <mesh position={[0, 0.65, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <capsuleGeometry args={[0.23, 0.2, 16, 32]} />
+          <capsuleGeometry args={[0.18, 0.2, 16, 32]} />
           <meshStandardMaterial color="#FFDBAC" />
         </mesh>
         
@@ -129,9 +129,9 @@ function AvatarModel({ outfitItems = [] }) {
 
       {outfitItems.includes('pants') && (
         <group position={[0, 0.2, 0]}>
-          {/* Hip part */}
+          {/* Hip part - Fixed TypeScript error by moving rotation to mesh */}
           <mesh position={[0, 0.45, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <capsuleGeometry args={[0.24, 0.22, 16, 32]} />
+            <capsuleGeometry args={[0.19, 0.22, 16, 32]} />
             <meshStandardMaterial color="#1e3a8a" transparent opacity={0.9} />
           </mesh>
           {/* Legs */}
@@ -251,6 +251,11 @@ export function AvatarPreview({
       <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-2 rounded-full shadow-sm flex items-center">
         <span className="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
         Avatar Activo
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="text-4xl font-bold text-black/20 transform rotate-[-30deg]">
+          Próximamente
+        </div>
       </div>
     </div>
   );

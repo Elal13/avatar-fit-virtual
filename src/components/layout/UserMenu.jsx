@@ -25,12 +25,16 @@ const useAuth = () => {
   
   const login = () => {
     setIsLoggedIn(true);
-    toast.success("Inicio de sesión exitoso");
+    toast.success("Inicio de sesión exitoso", {
+      position: "bottom-right"
+    });
   };
   
   const logout = () => {
     setIsLoggedIn(false);
-    toast.info("Has cerrado sesión");
+    toast.info("Has cerrado sesión", {
+      position: "bottom-right"
+    });
   };
   
   return { isLoggedIn, login, logout };
@@ -46,12 +50,16 @@ export function UserMenu() {
   };
 
   const handleWeb3Login = () => {
-    toast.info("Conectando con wallet...");
+    toast.info("Conectando con wallet...", {
+      position: "bottom-right"
+    });
     // Simulated Web3 login
     setTimeout(() => {
       login();
       setShowLoginOptions(false);
-      toast.success("Wallet conectada correctamente");
+      toast.success("Wallet conectada correctamente", {
+        position: "bottom-right"
+      });
     }, 1500);
   };
 
