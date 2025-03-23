@@ -203,13 +203,13 @@ function Scene({ outfitItems = [] }) {
         shadow-mapSize-width={1024} 
         shadow-mapSize-height={1024}
       />
-      <PerspectiveCamera makeDefault position={[0, 0.5, 2.7]} fov={40} />
+      <PerspectiveCamera makeDefault position={[0, 0.5, 2.5]} fov={40} />
       <OrbitControls 
         enablePan={false}
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={Math.PI / 1.8}
         minDistance={2}
-        maxDistance={5}
+        maxDistance={4.5}
       />
       <AvatarModel outfitItems={outfitItems} />
     </>
@@ -251,11 +251,6 @@ export function AvatarPreview({
       <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-2 rounded-full shadow-sm flex items-center">
         <span className="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
         Avatar Activo
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="text-4xl font-bold text-black/20 transform rotate-[-30deg]">
-          Próximamente
-        </div>
       </div>
     </div>
   );
