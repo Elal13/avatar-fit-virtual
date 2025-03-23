@@ -1,16 +1,18 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './UserMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCart } from '@/context/CartContext';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { cartCount } = useCart();
 
   const handleScroll = () => {
     const offset = window.scrollY;
@@ -27,7 +29,6 @@ export function Navbar() {
   const navItems = [
     { name: 'Inicio', path: '/' },
     { name: 'Tienda', path: '/shop' },
-    { name: 'Avatar', path: '/avatar' },
     { name: 'Armario', path: '/closet' },
   ];
 
@@ -84,23 +85,17 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-700 hover:text-avatar-500 hover:bg-avatar-50 rounded-full"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
             className="text-gray-700 hover:text-avatar-500 hover:bg-avatar-50 rounded-full relative"
             aria-label="Cart"
             asChild
           >
             <Link to="/cart">
               <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-avatar-600 text-white rounded-full h-4 w-4 flex items-center justify-center text-xs">
-                2
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-avatar-600 text-white rounded-full h-4 w-4 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </Button>
           <UserMenu />
@@ -116,9 +111,11 @@ export function Navbar() {
           >
             <Link to="/cart">
               <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-avatar-600 text-white rounded-full h-4 w-4 flex items-center justify-center text-xs">
-                2
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-avatar-600 text-white rounded-full h-4 w-4 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </Button>
           <Button

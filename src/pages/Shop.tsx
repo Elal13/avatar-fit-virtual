@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ProductCard, type Product } from '@/components/shop/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import { AvatarPreview } from '@/components/avatar/AvatarPreview';
 
 // Sample products data
@@ -292,22 +291,5 @@ const Shop = () => {
     </PageLayout>
   );
 };
-
-// Missing Eye icon component
-const Eye = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
 
 export default Shop;

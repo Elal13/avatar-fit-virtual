@@ -5,53 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
-
-// Sample cart items
-const initialCartItems = [
-  {
-    id: '1',
-    name: 'Camiseta Básica',
-    brand: 'AVATAR Basic',
-    price: 29.99,
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    category: 'Camisetas',
-    size: 'M',
-    color: 'Blanco',
-    quantity: 1,
-    hasNFT: true
-  },
-  {
-    id: '3',
-    name: 'Zapatillas Deportivas',
-    brand: 'AVATAR Sport',
-    price: 89.99,
-    image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    category: 'Calzado',
-    size: '42',
-    color: 'Negro',
-    quantity: 1,
-    hasNFT: true
-  }
-];
+import { useCart } from '@/context/CartContext';
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const [promoCode, setPromoCode] = useState('');
   const [isPromoApplied, setIsPromoApplied] = useState(false);
 
-  const handleQuantityChange = (id: string, change: number) => {
-    setCartItems(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { ...item, quantity: Math.max(1, item.quantity + change) } 
-          : item
-      )
-    );
-  };
-
   const handleRemoveItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-    toast.success('Producto eliminado del carrito');
+    removeFromCart(id);
   };
 
   const handleApplyPromo = () => {
@@ -142,7 +104,7 @@ const Cart = () => {
                             <div className="flex items-center border border-gray-200 rounded-lg">
                               <button 
                                 className="p-2 text-gray-500 hover:text-avatar-600 transition-colors"
-                                onClick={() => handleQuantityChange(item.id, -1)}
+                                onClick={() => updateQuantity(item.id, -1)}
                                 disabled={item.quantity <= 1}
                               >
                                 <Minus className="h-4 w-4" />
@@ -150,7 +112,7 @@ const Cart = () => {
                               <span className="px-4 py-2 font-medium">{item.quantity}</span>
                               <button 
                                 className="p-2 text-gray-500 hover:text-avatar-600 transition-colors"
-                                onClick={() => handleQuantityChange(item.id, 1)}
+                                onClick={() => updateQuantity(item.id, 1)}
                               >
                                 <Plus className="h-4 w-4" />
                               </button>

@@ -118,32 +118,32 @@ export function UserMenu() {
         <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="/profile" className="cursor-pointer">
+          <DropdownMenuItem>
+            <Link to="/profile" className="flex items-center w-full cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/orders" className="cursor-pointer">
+          <DropdownMenuItem>
+            <Link to="/orders" className="flex items-center w-full cursor-pointer">
               <ShoppingBag className="mr-2 h-4 w-4" />
               <span>Mis Pedidos</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/history" className="cursor-pointer">
+          <DropdownMenuItem>
+            <Link to="/history" className="flex items-center w-full cursor-pointer">
               <History className="mr-2 h-4 w-4" />
               <span>Historial</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/payment" className="cursor-pointer">
+          <DropdownMenuItem>
+            <Link to="/payment" className="flex items-center w-full cursor-pointer">
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Métodos de Pago</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/settings" className="cursor-pointer">
+          <DropdownMenuItem>
+            <Link to="/settings" className="flex items-center w-full cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               <span>Configuración</span>
             </Link>
