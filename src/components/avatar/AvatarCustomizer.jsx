@@ -39,12 +39,18 @@ export function AvatarCustomizer() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 rounded-xl overflow-hidden">
+      <div className="lg:col-span-2 rounded-xl overflow-hidden relative">
         <AvatarPreview 
           className="w-full aspect-square lg:aspect-[4/3] bg-gradient-to-tr from-gray-50 to-avatar-50" 
           outfitItems={activeOutfitItems}
           isRotating={true}
         />
+        {/* Marca de agua "Próximamente" */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="transform rotate-[-35deg] text-6xl font-bold text-avatar-300/30 tracking-widest whitespace-nowrap">
+            PRÓXIMAMENTE
+          </div>
+        </div>
       </div>
 
       <div className="lg:col-span-1">
@@ -58,14 +64,14 @@ export function AvatarCustomizer() {
 
           <Tabs defaultValue="body" className="w-full" onValueChange={setActiveTab}>
             <div className="px-4 pt-4">
-              <TabsList className="w-full grid grid-cols-4">
+              <TabsList className="w-full grid grid-cols-4 gap-1">
                 {customizationOptions.map(option => (
                   <TabsTrigger 
                     key={option.id} 
                     value={option.id}
-                    className="data-[state=active]:bg-avatar-100 data-[state=active]:text-avatar-900"
+                    className="data-[state=active]:bg-avatar-100 data-[state=active]:text-avatar-900 flex items-center justify-center"
                   >
-                    <span className="mr-2">{option.icon}</span>
+                    <span className="mr-1">{option.icon}</span>
                     <span className="hidden sm:inline">{option.label}</span>
                   </TabsTrigger>
                 ))}
@@ -85,7 +91,7 @@ export function AvatarCustomizer() {
                     min={140} 
                     step={1}
                     onValueChange={(value) => handleMeasurementChange('height', value)}
-                    className="mx-auto max-w-[90%]"
+                    className="mx-auto"
                   />
                 </div>
                 
@@ -100,7 +106,7 @@ export function AvatarCustomizer() {
                     min={40} 
                     step={1} 
                     onValueChange={(value) => handleMeasurementChange('weight', value)}
-                    className="mx-auto max-w-[90%]"
+                    className="mx-auto"
                   />
                 </div>
                 
@@ -115,7 +121,7 @@ export function AvatarCustomizer() {
                     min={70} 
                     step={1} 
                     onValueChange={(value) => handleMeasurementChange('chest', value)}
-                    className="mx-auto max-w-[90%]"
+                    className="mx-auto"
                   />
                 </div>
                 
@@ -130,22 +136,43 @@ export function AvatarCustomizer() {
                     min={60} 
                     step={1}
                     onValueChange={(value) => handleMeasurementChange('waist', value)}
-                    className="mx-auto max-w-[90%]"
+                    className="mx-auto"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-700">Cadera</label>
+                    <span className="text-sm text-avatar-700 font-medium">{measurements.hips} cm</span>
+                  </div>
+                  <Slider 
+                    defaultValue={[measurements.hips]} 
+                    max={130} 
+                    min={60} 
+                    step={1}
+                    onValueChange={(value) => handleMeasurementChange('hips', value)}
+                    className="mx-auto"
                   />
                 </div>
               </TabsContent>
               
-              <TabsContent value="face" className="space-y-3 mt-0 flex flex-col items-center">
-                <p className="text-sm text-gray-500">Personaliza las características faciales de tu avatar</p>
-                <div className="p-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                  <span className="text-3xl">😊</span>
+              <TabsContent value="face" className="space-y-3 mt-0">
+                <p className="text-sm text-gray-500 text-center mb-3">Personaliza las características faciales</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-w-[90%] mx-auto">
+                  {['👁️', '👃', '👄', '👂', '🧔', '👨‍🦰', '👩‍🦰', '👨‍🦳'].map((feature, index) => (
+                    <button 
+                      key={index}
+                      className="p-3 rounded-lg border border-gray-200 hover:border-avatar-400 hover:bg-avatar-50 transition-colors flex items-center justify-center"
+                    >
+                      <span className="text-2xl">{feature}</span>
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-center text-avatar-600">Más opciones próximamente</p>
               </TabsContent>
               
               <TabsContent value="hair" className="space-y-3 mt-0">
-                <p className="text-sm text-gray-500 text-center mb-3">Selecciona el estilo y color de cabello</p>
-                <div className="grid grid-cols-4 gap-2 max-w-[90%] mx-auto">
+                <p className="text-sm text-gray-500 text-center mb-3">Elige el estilo y color de cabello</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-w-[90%] mx-auto">
                   {['🧑', '👩‍🦱', '👨‍🦰', '👩‍🦳', '👨‍🦳', '👨‍🦲', '👱‍♀️', '👱‍♂️'].map((style, index) => (
                     <button 
                       key={index}
