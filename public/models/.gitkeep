@@ -1,0 +1,10 @@
+
+# Avatar models folder
+# Place your glTF/GLB models here
+
+Required models:
+- avatar-base.glb - Base avatar model with skeleton
+- clothing/shirt.glb - Shirt model
+- clothing/pants.glb - Pants model
+- clothing/shoes.glb - Shoes model
+- clothing/glasses.glb - Glasses model

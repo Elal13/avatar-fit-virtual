@@ -1,11 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { AvatarCustomizer } from '@/components/avatar/AvatarCustomizer';
+import { AvatarModelingGuide } from '@/components/avatar/AvatarModelingGuide';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
 
 const Avatar = () => {
+  const [activeTab, setActiveTab] = useState('customizer');
+  
   return (
     <PageLayout>
       <section className="pt-12 pb-24 bg-gray-50">
@@ -19,7 +23,20 @@ const Avatar = () => {
             </p>
           </div>
           
-          <AvatarCustomizer />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+            <TabsList>
+              <TabsTrigger value="customizer">Personalización</TabsTrigger>
+              <TabsTrigger value="guide">Guía de Modelado</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="customizer" className="mt-6">
+              <AvatarCustomizer />
+            </TabsContent>
+            
+            <TabsContent value="guide" className="mt-6">
+              <AvatarModelingGuide />
+            </TabsContent>
+          </Tabs>
           
           <div className="mt-16 text-center">
             <p className="text-gray-600 mb-6">
