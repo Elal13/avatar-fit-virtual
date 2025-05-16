@@ -6,9 +6,15 @@ import { AvatarCustomizer } from '@/components/avatar/AvatarCustomizer';
 import { AvatarModelingGuide } from '@/components/avatar/AvatarModelingGuide';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Avatar = () => {
   const [activeTab, setActiveTab] = useState('customizer');
+  
+  // Añadir un handler para mostrar un mensaje informativo
+  const handleModelingGuideClick = () => {
+    toast.info("Guía de modelado: Se utilizan geometrías básicas temporalmente.");
+  };
   
   return (
     <PageLayout>
@@ -26,7 +32,7 @@ const Avatar = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <TabsList>
               <TabsTrigger value="customizer">Personalización</TabsTrigger>
-              <TabsTrigger value="guide">Guía de Modelado</TabsTrigger>
+              <TabsTrigger value="guide" onClick={handleModelingGuideClick}>Guía de Modelado</TabsTrigger>
             </TabsList>
             
             <TabsContent value="customizer" className="mt-6">

@@ -1,13 +1,11 @@
 
 import { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   OrbitControls, 
-  useGLTF, 
   PerspectiveCamera, 
   Sky, 
-  Environment, 
-  useAnimations 
+  Environment,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { toast } from 'sonner';
@@ -18,7 +16,7 @@ const AvatarContext = createContext();
 // Hook personalizado para acceder al contexto del avatar
 export const useAvatar = () => useContext(AvatarContext);
 
-// Modelo de Avatar con skinning
+// Modelo de Avatar con geometrías básicas en lugar de GLB
 function AvatarModel({ 
   outfitItems = [],
   bodyScale = 1.0,
@@ -27,11 +25,6 @@ function AvatarModel({
   clothingOffsets = {}
 }) {
   const group = useRef(null);
-  const skeletonRef = useRef(null);
-  const { scene, animations } = useGLTF('/models/avatar-base.glb');
-  const { actions, mixer } = useAnimations(animations, group);
-  const [skeleton, setSkeleton] = useState(null);
-  const [avatarMeshes, setAvatarMeshes] = useState({});
   const [clothingMeshes, setClothingMeshes] = useState({});
 
   // Rotación del avatar
@@ -41,90 +34,27 @@ function AvatarModel({
     }
   });
 
-  // Efecto para inicializar el esqueleto y meshes de avatar
-  useEffect(() => {
-    // Buscar SkinnedMesh y esqueleto en el modelo
-    let foundSkeleton = null;
-    const meshes = {};
-    
-    scene.traverse((object) => {
-      // Guardar referencia al esqueleto del primer SkinnedMesh encontrado
-      if (object.type === 'SkinnedMesh' && !foundSkeleton) {
-        foundSkeleton = object.skeleton;
-        skeletonRef.current = foundSkeleton;
-        setSkeleton(foundSkeleton);
-        console.log("Esqueleto encontrado:", foundSkeleton);
-      }
-      
-      // Guardar referencias a las partes del cuerpo para modificarlas después
-      if (object.isMesh) {
-        // Asumimos que las mallas tienen nombres descriptivos como "body", "head", etc.
-        meshes[object.name] = object;
-      }
-    });
-
-    setAvatarMeshes(meshes);
-    
-    // Iniciar animación de idle si existe
-    if (animations && animations.length > 0) {
-      const idleAction = actions['idle'] || Object.values(actions)[0];
-      if (idleAction) {
-        idleAction.reset().fadeIn(0.5).play();
-      }
-    }
-
-    // Clone y prepara el escene
-    group.current.add(scene.clone());
-    
-  }, [scene, animations, actions]);
-
-  // Aplicar escala corporal
-  useEffect(() => {
-    if (avatarMeshes.body) {
-      // Aplicar escalado basado en los sliders de personalización
-      const hipScale = 0.8 + (hipSize / 100 * 0.4); // 0.8 a 1.2 basado en hipSize
-      const chestScale = 0.8 + (chestSize / 100 * 0.4); // 0.8 a 1.2 basado en chestSize
-      
-      const hips = skeletonRef.current?.getBoneByName('Hips');
-      const chest = skeletonRef.current?.getBoneByName('Spine2');
-      
-      if (hips) {
-        hips.scale.set(hipScale, 1, hipScale);
-      }
-      
-      if (chest) {
-        chest.scale.set(chestScale, 1, chestScale);
-      }
-      
-      // Escala global
-      group.current.scale.set(bodyScale, bodyScale, bodyScale);
-    }
-  }, [bodyScale, hipSize, chestSize, avatarMeshes]);
-
-  // Cargar y gestionar prendas
+  // Efecto para cargar y gestionar prendas
   useEffect(() => {
     const newClothingMeshes = {...clothingMeshes};
     
     // Lista de prendas a mostrar u ocultar
     const availableClothing = {
-      'shirt': '/models/clothing/shirt.glb',
-      'pants': '/models/clothing/pants.glb',
-      'shoes': '/models/clothing/shoes.glb',
-      'glasses': '/models/clothing/glasses.glb'
+      'shirt': 'shirt',
+      'pants': 'pants',
+      'shoes': 'shoes',
+      'glasses': 'glasses'
     };
     
     // Mostrar/ocultar prendas según selección
-    Object.entries(availableClothing).forEach(([item, url]) => {
+    Object.entries(availableClothing).forEach(([item]) => {
       const shouldDisplay = outfitItems.includes(item);
       
       // Si la prenda está seleccionada pero aún no está cargada
       if (shouldDisplay && !newClothingMeshes[item]) {
-        // Cargar la prenda (implementación simplificada)
-        console.log(`Cargando prenda: ${item}`);
-        
-        // En un caso real, cargaríamos el modelo con useGLTF o useLoader
-        // y luego lo vincularíamos al esqueleto del avatar
-        loadClothingItem(item, url).then(mesh => {
+        // En lugar de cargar GLB, creamos geometrías simple
+        console.log(`Creando prenda: ${item}`);
+        loadClothingItem(item).then(mesh => {
           if (mesh) {
             newClothingMeshes[item] = mesh;
             setClothingMeshes({...newClothingMeshes});
@@ -148,20 +78,34 @@ function AvatarModel({
       }
     });
     
-  }, [outfitItems, clothingOffsets, skeleton]);
+  }, [outfitItems, clothingOffsets]);
   
-  // Función para cargar una prenda de vestir
-  const loadClothingItem = async (itemName, url) => {
-    if (!skeletonRef.current) {
-      console.error("No hay esqueleto disponible para vincular la prenda");
-      return null;
-    }
-    
-    try {
-      // En una implementación real, usaríamos useLoader o useGLTF para cargar el modelo
-      // Aquí simulamos el proceso con un placeholder
+  // Aplicar escala corporal
+  useEffect(() => {
+    if (group.current) {
+      // Escala global
+      group.current.scale.set(bodyScale, bodyScale, bodyScale);
       
-      // Simulación - en producción esto sería reemplazado por la carga real del modelo
+      // Simulación de cambios en tamaño de cadera y pecho
+      const hipScale = 0.8 + (hipSize / 100 * 0.4); // 0.8 a 1.2 basado en hipSize
+      const chestScale = 0.8 + (chestSize / 100 * 0.4); // 0.8 a 1.2 basado en chestSize
+      
+      // Aplicar escalas a partes del cuerpo si existen
+      group.current.children.forEach(child => {
+        if (child.name === "hips" && hipSize !== 50) {
+          child.scale.set(hipScale, 1, hipScale);
+        }
+        if (child.name === "chest" && chestSize !== 50) {
+          child.scale.set(chestScale, 1, chestScale);
+        }
+      });
+    }
+  }, [bodyScale, hipSize, chestSize]);
+  
+  // Función para crear una prenda usando geometrías básicas
+  const loadClothingItem = async (itemName) => {
+    try {
+      // Crear geometrías según el tipo de prenda
       const dummyGeometry = new THREE.BoxGeometry(0.4, 0.6, 0.3);
       const material = new THREE.MeshStandardMaterial({ 
         color: itemName === 'shirt' ? '#3b82f6' : 
@@ -194,21 +138,101 @@ function AvatarModel({
       // Añadir al grupo
       group.current.add(mesh);
       
-      console.log(`Prenda ${itemName} cargada y vinculada al esqueleto`);
+      console.log(`Prenda ${itemName} creada y añadida al avatar`);
       return mesh;
       
     } catch (error) {
-      console.error(`Error al cargar la prenda ${itemName}:`, error);
+      console.error(`Error al crear la prenda ${itemName}:`, error);
       toast.error(`Error al cargar ${itemName}`);
       return null;
     }
   };
 
-  // Proporcionar contexto para componentes hijos
+  // Avatar básico con geometrías simples
   return (
-    <AvatarContext.Provider value={{ skeleton: skeletonRef.current, avatarMeshes, clothingMeshes }}>
+    <AvatarContext.Provider value={{ clothingMeshes }}>
       <group ref={group} position={[0, -1, 0]}>
-        {/* El modelo y las prendas se añaden dinámicamente al grupo */}
+        {/* Cabeza */}
+        <mesh position={[0, 1.6, 0]}>
+          <sphereGeometry args={[0.25, 32, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Torso */}
+        <mesh position={[0, 1.05, 0]} name="chest">
+          <capsuleGeometry args={[0.22, 0.6, 16, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Cadera */}
+        <mesh position={[0, 0.65, 0]} rotation={[Math.PI / 2, 0, 0]} name="hips">
+          <capsuleGeometry args={[0.18, 0.2, 16, 32]} />
+          <meshStandardMaterial color="#FFDBAC" />
+        </mesh>
+        
+        {/* Pierna Izquierda */}
+        <group position={[-0.15, 0.2, 0]}>
+          <mesh position={[0, 0.15, 0]}>
+            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.3, 0]}>
+            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.7, 0.05]}>
+            <boxGeometry args={[0.1, 0.1, 0.25]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Pierna Derecha */}
+        <group position={[0.15, 0.2, 0]}>
+          <mesh position={[0, 0.15, 0]}>
+            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.3, 0]}>
+            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0, -0.7, 0.05]}>
+            <boxGeometry args={[0.1, 0.1, 0.25]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Brazo Izquierdo */}
+        <group position={[-0.3, 1.2, 0]}>
+          <mesh position={[0, 0, 0]} rotation={[0, 0, -0.3]}>
+            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[-0.1, -0.2, 0]} rotation={[0, 0, -0.5]}>
+            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[-0.2, -0.3, 0]}>
+            <sphereGeometry args={[0.05, 32, 16]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
+        
+        {/* Brazo Derecho */}
+        <group position={[0.3, 1.2, 0]}>
+          <mesh position={[0, 0, 0]} rotation={[0, 0, 0.3]}>
+            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0.1, -0.2, 0]} rotation={[0, 0, 0.5]}>
+            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+          <mesh position={[0.2, -0.3, 0]}>
+            <sphereGeometry args={[0.05, 32, 16]} />
+            <meshStandardMaterial color="#FFDBAC" />
+          </mesh>
+        </group>
       </group>
     </AvatarContext.Provider>
   );
@@ -297,18 +321,7 @@ export function AvatarPreview({
   );
 }
 
-// Precarga y gestión de modelos 3D
-const modelLoader = {
-  avatarBase: '/models/avatar-base.glb',
-  shirt: '/models/clothing/shirt.glb',
-  pants: '/models/clothing/pants.glb',
-  shoes: '/models/clothing/shoes.glb',
-  glasses: '/models/clothing/glasses.glb'
-};
-
-// Nota: Esta función ayuda a pre-cargar modelos
+// Ya no intentamos precargar modelos externos
 export const preloadAvatarModels = () => {
-  Object.values(modelLoader).forEach(url => {
-    useGLTF.preload(url);
-  });
+  console.log("No se requiere precarga de modelos");
 };
