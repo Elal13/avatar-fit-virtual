@@ -6,7 +6,6 @@ import {
   PerspectiveCamera, 
   Sky, 
   Environment,
-  useGLTF,
   Box,
   Sphere,
   Cylinder
@@ -20,7 +19,7 @@ const AvatarContext = createContext();
 // Hook personalizado para acceder al contexto del avatar
 export const useAvatar = () => useContext(AvatarContext);
 
-// Modelo de Avatar usando geometrías básicas o glTF cuando esté disponible
+// Modelo de Avatar usando geometrías básicas
 function AvatarModel({ 
   outfitItems = [],
   bodyScale = 1.0,
@@ -31,59 +30,11 @@ function AvatarModel({
   const group = useRef(null);
   const [clothingMeshes, setClothingMeshes] = useState({});
   const [modelLoaded, setModelLoaded] = useState(false);
-  const [modelLoadError, setModelLoadError] = useState(false);
   
-  // Intentar cargar el modelo glTF
-  const { scene: gltfScene, animations } = useGLTF('/models/OrcIdle.glb', undefined, 
-    (error) => {
-      console.error('Error loading GLB model:', error);
-      setModelLoadError(true);
-      toast.error('No se pudo cargar el modelo 3D. Usando modelo básico.');
-    }
-  );
-  
-  // Clonar la escena para no modificar la original cargada
-  const modelScene = useRef();
-  
-  // Efecto para configurar el modelo
+  // Crear un modelo básico directamente en lugar de cargar un GLB
   useEffect(() => {
-    // Si no hay error y tenemos una escena glTF
-    if (!modelLoadError && gltfScene) {
-      try {
-        // Clonar la escena
-        const clonedScene = gltfScene.clone(true);
-        
-        // Aplicar escala al modelo
-        clonedScene.scale.set(0.01, 0.01, 0.01);
-        
-        // Centrar el modelo
-        clonedScene.position.set(0, -1, 0);
-        
-        // Añadir al grupo
-        if (group.current) {
-          // Limpiar cualquier modelo previo
-          while (group.current.children.length) {
-            group.current.remove(group.current.children[0]);
-          }
-          
-          // Añadir el nuevo modelo
-          group.current.add(clonedScene);
-          modelScene.current = clonedScene;
-          
-          setModelLoaded(true);
-          console.log('Modelo ORC cargado correctamente');
-        }
-      } catch (error) {
-        console.error('Error al procesar el modelo:', error);
-        setModelLoadError(true);
-        toast.error('Error al procesar el modelo 3D.');
-      }
-    } 
-    // Si hay error o no hay escena, crear un modelo básico
-    else if (modelLoadError || !gltfScene) {
-      createBasicAvatarModel();
-    }
-  }, [gltfScene, modelLoadError]);
+    createBasicAvatarModel();
+  }, []);
   
   // Función para crear un modelo avatar básico usando geometrías
   const createBasicAvatarModel = () => {
@@ -150,11 +101,14 @@ function AvatarModel({
     
     // Añadir al grupo principal
     group.current.add(basicModel);
-    modelScene.current = basicModel;
     
-    // Informar que estamos usando un modelo básico
-    console.log('Usando modelo avatar básico como fallback');
+    console.log('Usando modelo avatar básico construido con geometrías');
     setModelLoaded(true);
+    
+    // Informar al usuario sobre el modelo básico
+    toast.info("Usando modelo básico de avatar. Modelo 3D no disponible.", {
+      duration: 4000,
+    });
   };
   
   // Rotación del avatar
@@ -166,15 +120,15 @@ function AvatarModel({
 
   // Efecto para aplicar escala corporal
   useEffect(() => {
-    if (modelScene.current) {
+    if (group.current && group.current.children[0]) {
       // Aplicar escala global
-      modelScene.current.scale.set(
-        modelLoadError ? bodyScale : 0.01 * bodyScale,
-        modelLoadError ? bodyScale : 0.01 * bodyScale,
-        modelLoadError ? bodyScale : 0.01 * bodyScale
+      group.current.children[0].scale.set(
+        bodyScale,
+        bodyScale,
+        bodyScale
       );
     }
-  }, [bodyScale, hipSize, chestSize, modelLoadError]);
+  }, [bodyScale, hipSize, chestSize]);
   
   // Efecto para cargar y gestionar prendas
   useEffect(() => {
@@ -196,8 +150,7 @@ function AvatarModel({
       
       // Si la prenda está seleccionada pero aún no está cargada
       if (shouldDisplay && !newClothingMeshes[item]) {
-        // En lugar de cargar GLB, creamos geometrías simples temporalmente
-        // Este sería el punto donde cargaríamos modelos glTF de prendas
+        // Creamos geometrías simples para las prendas
         console.log(`Creando prenda: ${item}`);
         loadClothingItem(item).then(mesh => {
           if (mesh) {
@@ -228,7 +181,9 @@ function AvatarModel({
   // Función para crear una prenda usando geometrías básicas
   const loadClothingItem = async (itemName) => {
     try {
-      if (!modelScene.current) return null;
+      if (!group.current || !group.current.children[0]) return null;
+      
+      const basicModel = group.current.children[0];
       
       // Crear geometrías según el tipo de prenda
       const dummyGeometry = new THREE.BoxGeometry(0.4, 0.6, 0.3);
@@ -247,25 +202,25 @@ function AvatarModel({
       // Posicionar según el tipo de prenda y en relación al modelo
       switch (itemName) {
         case 'shirt':
-          mesh.position.set(0, modelLoadError ? 0.15 : 0.4, 0);
+          mesh.position.set(0, 0.15, 0);
           mesh.scale.set(1.1, 1.1, 1.1);
           break;
         case 'pants':
-          mesh.position.set(0, modelLoadError ? -0.35 : -0.5, 0);
+          mesh.position.set(0, -0.35, 0);
           mesh.scale.set(1, 1.2, 1);
           break;
         case 'shoes':
-          mesh.position.set(0, modelLoadError ? -0.6 : -1.3, 0.2);
+          mesh.position.set(0, -0.6, 0.2);
           mesh.scale.set(0.8, 0.3, 1.3);
           break;
         case 'glasses':
-          mesh.position.set(0, modelLoadError ? 0.7 : 0.8, modelLoadError ? 0.25 : 0.5);
+          mesh.position.set(0, 0.7, 0.25);
           mesh.scale.set(0.8, 0.2, 0.3);
           break;
       }
       
       // Añadir al grupo
-      modelScene.current.add(mesh);
+      basicModel.add(mesh);
       
       console.log(`Prenda ${itemName} creada y añadida al avatar`);
       return mesh;
@@ -370,6 +325,5 @@ export function AvatarPreview({
 
 // Eliminar preload para evitar errores 404
 export const preloadAvatarModels = () => {
-  // La precarga solo se debe ejecutar si verificamos que el archivo existe
   console.log('Precarga de modelos desactivada para evitar errores 404');
 };

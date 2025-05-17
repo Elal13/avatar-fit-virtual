@@ -11,6 +11,7 @@ import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import Closet from "./pages/Closet";
 import Cart from "./pages/Cart";
+import Avatar from "./pages/Avatar";
 import { CartProvider } from "@/context/CartContext";
 
 // Create a client
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/closet" element={<Closet />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/avatar" element={<Avatar />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>

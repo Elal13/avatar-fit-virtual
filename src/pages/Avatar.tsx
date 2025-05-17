@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { AvatarCustomizer } from '@/components/avatar/AvatarCustomizer';
 import { Button } from '@/components/ui/button';
