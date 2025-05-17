@@ -6,17 +6,21 @@ import {
   PerspectiveCamera, 
   Sky, 
   Environment,
+  useGLTF
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { toast } from 'sonner';
 
-// Contexto para compartir el esqueleto y la pose del avatar
+// Contexto para compartir datos del avatar
 const AvatarContext = createContext();
 
 // Hook personalizado para acceder al contexto del avatar
 export const useAvatar = () => useContext(AvatarContext);
 
-// Modelo de Avatar con geometrías básicas en lugar de GLB
+// Precargar el modelo glTF
+useGLTF.preload('/models/OrcIdle.glb');
+
+// Modelo de Avatar usando glTF
 function AvatarModel({ 
   outfitItems = [],
   bodyScale = 1.0,
@@ -26,7 +30,41 @@ function AvatarModel({
 }) {
   const group = useRef(null);
   const [clothingMeshes, setClothingMeshes] = useState({});
-
+  
+  // Cargar el modelo glTF
+  const { scene, animations } = useGLTF('/models/OrcIdle.glb');
+  
+  // Clonar la escena para no modificar la original cargada
+  const modelScene = useRef();
+  
+  // Efecto para configurar el modelo
+  useEffect(() => {
+    if (scene) {
+      // Clonar la escena
+      const clonedScene = scene.clone(true);
+      
+      // Aplicar escala al modelo (ajustar según necesidades)
+      clonedScene.scale.set(0.01, 0.01, 0.01);
+      
+      // Centrar el modelo
+      clonedScene.position.set(0, -1, 0);
+      
+      // Añadir al grupo
+      if (group.current) {
+        // Limpiar cualquier modelo previo
+        while (group.current.children.length) {
+          group.current.remove(group.current.children[0]);
+        }
+        
+        // Añadir el nuevo modelo
+        group.current.add(clonedScene);
+        modelScene.current = clonedScene;
+        
+        console.log('Modelo ORC cargado correctamente');
+      }
+    }
+  }, [scene]);
+  
   // Rotación del avatar
   useFrame((state) => {
     if (group.current) {
@@ -34,6 +72,21 @@ function AvatarModel({
     }
   });
 
+  // Efecto para aplicar escala corporal
+  useEffect(() => {
+    if (modelScene.current) {
+      // Aplicar escala global
+      modelScene.current.scale.set(
+        0.01 * bodyScale,
+        0.01 * bodyScale,
+        0.01 * bodyScale
+      );
+      
+      // Nota: Para cambios más específicos como tamaño de cadera o pecho,
+      // se necesitaría acceder a los huesos específicos del esqueleto (skeleton)
+    }
+  }, [bodyScale, hipSize, chestSize]);
+  
   // Efecto para cargar y gestionar prendas
   useEffect(() => {
     const newClothingMeshes = {...clothingMeshes};
@@ -52,7 +105,8 @@ function AvatarModel({
       
       // Si la prenda está seleccionada pero aún no está cargada
       if (shouldDisplay && !newClothingMeshes[item]) {
-        // En lugar de cargar GLB, creamos geometrías simple
+        // En lugar de cargar GLB, creamos geometrías simples temporalmente
+        // Este sería el punto donde cargaríamos modelos glTF de prendas
         console.log(`Creando prenda: ${item}`);
         loadClothingItem(item).then(mesh => {
           if (mesh) {
@@ -80,31 +134,11 @@ function AvatarModel({
     
   }, [outfitItems, clothingOffsets]);
   
-  // Aplicar escala corporal
-  useEffect(() => {
-    if (group.current) {
-      // Escala global
-      group.current.scale.set(bodyScale, bodyScale, bodyScale);
-      
-      // Simulación de cambios en tamaño de cadera y pecho
-      const hipScale = 0.8 + (hipSize / 100 * 0.4); // 0.8 a 1.2 basado en hipSize
-      const chestScale = 0.8 + (chestSize / 100 * 0.4); // 0.8 a 1.2 basado en chestSize
-      
-      // Aplicar escalas a partes del cuerpo si existen
-      group.current.children.forEach(child => {
-        if (child.name === "hips" && hipSize !== 50) {
-          child.scale.set(hipScale, 1, hipScale);
-        }
-        if (child.name === "chest" && chestSize !== 50) {
-          child.scale.set(chestScale, 1, chestScale);
-        }
-      });
-    }
-  }, [bodyScale, hipSize, chestSize]);
-  
   // Función para crear una prenda usando geometrías básicas
   const loadClothingItem = async (itemName) => {
     try {
+      if (!modelScene.current) return null;
+      
       // Crear geometrías según el tipo de prenda
       const dummyGeometry = new THREE.BoxGeometry(0.4, 0.6, 0.3);
       const material = new THREE.MeshStandardMaterial({ 
@@ -115,28 +149,32 @@ function AvatarModel({
         opacity: 0.9
       });
       
-      // Crear un objeto que simule una malla skinned
+      // Crear un objeto que simule una malla
       const mesh = new THREE.Mesh(dummyGeometry, material);
       mesh.name = itemName;
       
-      // Posicionar según el tipo de prenda
+      // Posicionar según el tipo de prenda y en relación al modelo
       switch (itemName) {
         case 'shirt':
-          mesh.position.set(0, 1.05, 0);
+          mesh.position.set(0, 0.4, 0);
+          mesh.scale.set(1.1, 1.1, 1.1);
           break;
         case 'pants':
-          mesh.position.set(0, 0.2, 0);
+          mesh.position.set(0, -0.5, 0);
+          mesh.scale.set(1, 1.2, 1);
           break;
         case 'shoes':
-          mesh.position.set(0, -0.7, 0);
+          mesh.position.set(0, -1.3, 0.2);
+          mesh.scale.set(0.8, 0.3, 1.3);
           break;
         case 'glasses':
-          mesh.position.set(0, 1.6, 0.15);
+          mesh.position.set(0, 0.8, 0.5);
+          mesh.scale.set(0.8, 0.2, 0.3);
           break;
       }
       
       // Añadir al grupo
-      group.current.add(mesh);
+      modelScene.current.add(mesh);
       
       console.log(`Prenda ${itemName} creada y añadida al avatar`);
       return mesh;
@@ -148,92 +186,10 @@ function AvatarModel({
     }
   };
 
-  // Avatar básico con geometrías simples
+  // Devolvemos el grupo que contiene el avatar cargado
   return (
     <AvatarContext.Provider value={{ clothingMeshes }}>
-      <group ref={group} position={[0, -1, 0]}>
-        {/* Cabeza */}
-        <mesh position={[0, 1.6, 0]}>
-          <sphereGeometry args={[0.25, 32, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        
-        {/* Torso */}
-        <mesh position={[0, 1.05, 0]} name="chest">
-          <capsuleGeometry args={[0.22, 0.6, 16, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        
-        {/* Cadera */}
-        <mesh position={[0, 0.65, 0]} rotation={[Math.PI / 2, 0, 0]} name="hips">
-          <capsuleGeometry args={[0.18, 0.2, 16, 32]} />
-          <meshStandardMaterial color="#FFDBAC" />
-        </mesh>
-        
-        {/* Pierna Izquierda */}
-        <group position={[-0.15, 0.2, 0]}>
-          <mesh position={[0, 0.15, 0]}>
-            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0, -0.3, 0]}>
-            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0, -0.7, 0.05]}>
-            <boxGeometry args={[0.1, 0.1, 0.25]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-        </group>
-        
-        {/* Pierna Derecha */}
-        <group position={[0.15, 0.2, 0]}>
-          <mesh position={[0, 0.15, 0]}>
-            <capsuleGeometry args={[0.09, 0.3, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0, -0.3, 0]}>
-            <capsuleGeometry args={[0.08, 0.4, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0, -0.7, 0.05]}>
-            <boxGeometry args={[0.1, 0.1, 0.25]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-        </group>
-        
-        {/* Brazo Izquierdo */}
-        <group position={[-0.3, 1.2, 0]}>
-          <mesh position={[0, 0, 0]} rotation={[0, 0, -0.3]}>
-            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[-0.1, -0.2, 0]} rotation={[0, 0, -0.5]}>
-            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[-0.2, -0.3, 0]}>
-            <sphereGeometry args={[0.05, 32, 16]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-        </group>
-        
-        {/* Brazo Derecho */}
-        <group position={[0.3, 1.2, 0]}>
-          <mesh position={[0, 0, 0]} rotation={[0, 0, 0.3]}>
-            <capsuleGeometry args={[0.06, 0.25, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0.1, -0.2, 0]} rotation={[0, 0, 0.5]}>
-            <capsuleGeometry args={[0.05, 0.25, 16, 32]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-          <mesh position={[0.2, -0.3, 0]}>
-            <sphereGeometry args={[0.05, 32, 16]} />
-            <meshStandardMaterial color="#FFDBAC" />
-          </mesh>
-        </group>
-      </group>
+      <group ref={group} position={[0, 0, 0]} />
     </AvatarContext.Provider>
   );
 }
@@ -321,7 +277,8 @@ export function AvatarPreview({
   );
 }
 
-// Ya no intentamos precargar modelos externos
+// Precarga de modelos
 export const preloadAvatarModels = () => {
-  console.log("No se requiere precarga de modelos");
+  useGLTF.preload('/models/OrcIdle.glb');
 };
+
