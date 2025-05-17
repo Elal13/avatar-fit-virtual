@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { useState, useEffect, useRef, createContext, useContext, Suspense } from 'react';
 import { Canvas, useLoader, useFrame } from '@react-three/fiber';
 import { 
   OrbitControls, 
@@ -11,7 +10,7 @@ import {
   Cylinder
 } from '@react-three/drei';
 import * as THREE from 'three';
-import { MTLLoader, OBJLoader } from 'three-stdlib';
+import { MTLLoader, OBJLoader, FBXLoader } from 'three-stdlib';
 import { toast } from 'sonner';
 
 // Contexto para compartir datos del avatar
@@ -20,7 +19,7 @@ const AvatarContext = createContext();
 // Hook personalizado para acceder al contexto del avatar
 export const useAvatar = () => useContext(AvatarContext);
 
-// Componente para cargar modelos OBJ con sus materiales
+// Componente para cargar modelos FBX
 function AvatarModel({ 
   outfitItems = [],
   bodyScale = 1.0,
@@ -42,32 +41,27 @@ function AvatarModel({
     return () => clearTimeout(timer);
   }, []);
 
-  // Función para cargar modelo OBJ con sus materiales
-  const OrcModel = () => {
+  // Componente que carga el modelo FBX
+  const OrcFBXAvatar = () => {
     try {
-      // Intentamos cargar el modelo OBJ y sus materiales
-      const avatarMaterials = useLoader(MTLLoader, '/models/OrcIdle.mtl');
-      const avatar = useLoader(OBJLoader, '/models/OrcIdle.obj', (loader) => {
-        loader.setMaterials(avatarMaterials);
-      });
-
+      // Intentamos cargar el modelo FBX
+      const fbx = useLoader(FBXLoader, '/models/Orc Idle.fbx');
+      
       // Escalar y posicionar el avatar
-      avatar.scale.set(0.01, 0.01, 0.01);
+      fbx.scale.set(0.01, 0.01, 0.01);
       
       // Cargar la gorra si está seleccionada en outfitItems
       if (outfitItems.includes('glasses')) {
         try {
-          const capMaterials = useLoader(MTLLoader, '/models/Cap.mtl');
-          const cap = useLoader(OBJLoader, '/models/Cap.obj', (loader) => {
-            loader.setMaterials(capMaterials);
-          });
+          // Intentamos cargar la gorra como FBX
+          const cap = useLoader(FBXLoader, '/models/Cap.fbx');
           
           // Ajustar posición y escala de la gorra
           cap.position.set(0, 1.75, 0);
           cap.scale.set(0.1, 0.1, 0.1);
           
           // Añadir la gorra como hijo del avatar
-          avatar.add(cap);
+          fbx.add(cap);
         } catch (error) {
           console.error("Error al cargar la gorra:", error);
           toast.error("No se pudo cargar la gorra");
@@ -77,9 +71,8 @@ function AvatarModel({
       // Cargar camisa si está seleccionada
       if (outfitItems.includes('shirt')) {
         try {
-          // Aquí cargaríamos una camisa OBJ si existiera
-          // Por ahora es solo placerholder de código
-          console.log("Se cargaría la camisa OBJ aquí");
+          // Aquí cargaríamos una camisa FBX si existiera
+          console.log("Se cargaría la camisa FBX aquí");
           
           // Ejemplo de posicionamiento para una camisa
           // shirtModel.position.set(0, 0.8, 0);
@@ -90,7 +83,7 @@ function AvatarModel({
       
       // Aplicar escala global del cuerpo
       if (bodyScale !== 1.0) {
-        avatar.scale.multiplyScalar(bodyScale);
+        fbx.scale.multiplyScalar(bodyScale);
       }
       
       // Actualizar estado
@@ -99,15 +92,15 @@ function AvatarModel({
       
       // Rotar suavemente
       useFrame((state) => {
-        if (avatar) {
-          avatar.rotation.y = state.clock.getElapsedTime() * 0.15;
+        if (fbx) {
+          fbx.rotation.y = state.clock.getElapsedTime() * 0.15;
         }
       });
       
-      return <primitive object={avatar} />;
+      return <primitive object={fbx} />;
       
     } catch (error) {
-      console.error("Error al cargar el modelo OBJ:", error);
+      console.error("Error al cargar el modelo FBX:", error);
       setFallbackMode(true);
       
       // Informamos al usuario sobre el error
@@ -227,11 +220,13 @@ function AvatarModel({
     return <primitive object={basicModel.current} />;
   };
   
-  // Dependiendo del estado, mostramos el modelo OBJ o el fallback
+  // Dependiendo del estado, mostramos el modelo FBX o el fallback
   return (
     <AvatarContext.Provider value={{ clothingMeshes }}>
       <group ref={group} position={[0, 0, 0]}>
-        {fallbackMode ? <FallbackModel /> : <OrcModel />}
+        <Suspense fallback={<FallbackModel />}>
+          {fallbackMode ? <FallbackModel /> : <OrcFBXAvatar />}
+        </Suspense>
       </group>
     </AvatarContext.Provider>
   );
@@ -320,8 +315,8 @@ export function AvatarPreview({
   );
 }
 
-// Función de precarga modificada para OBJ y MTL
+// Función de precarga modificada para FBX
 export const preloadAvatarModels = () => {
-  console.log('Precargando modelos OBJ+MTL (desactivado por ahora para evitar errores 404)');
+  console.log('Precargando modelos FBX (desactivado por ahora para evitar errores 404)');
   // Aquí se podría implementar precarga real cuando tengamos los archivos
 };
