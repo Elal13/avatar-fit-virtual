@@ -1,16 +1,17 @@
 
 import { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useLoader, useFrame } from '@react-three/fiber';
 import { 
   OrbitControls, 
   PerspectiveCamera, 
   Sky, 
   Environment,
-  Box,
   Sphere,
+  Box,
   Cylinder
 } from '@react-three/drei';
 import * as THREE from 'three';
+import { MTLLoader, OBJLoader } from 'three-stdlib';
 import { toast } from 'sonner';
 
 // Contexto para compartir datos del avatar
@@ -19,7 +20,7 @@ const AvatarContext = createContext();
 // Hook personalizado para acceder al contexto del avatar
 export const useAvatar = () => useContext(AvatarContext);
 
-// Modelo de Avatar usando geometrías básicas
+// Componente para cargar modelos OBJ con sus materiales
 function AvatarModel({ 
   outfitItems = [],
   bodyScale = 1.0,
@@ -28,214 +29,210 @@ function AvatarModel({
   clothingOffsets = {}
 }) {
   const group = useRef(null);
-  const [clothingMeshes, setClothingMeshes] = useState({});
   const [modelLoaded, setModelLoaded] = useState(false);
-  
-  // Crear un modelo básico directamente en lugar de cargar un GLB
-  useEffect(() => {
-    createBasicAvatarModel();
-  }, []);
-  
-  // Función para crear un modelo avatar básico usando geometrías
-  const createBasicAvatarModel = () => {
-    if (!group.current) return;
-    
-    // Limpiar cualquier modelo previo
-    while (group.current.children.length) {
-      group.current.remove(group.current.children[0]);
-    }
-    
-    // Crear un grupo para el modelo básico
-    const basicModel = new THREE.Group();
-    
-    // Cabeza (esfera)
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.25, 32, 32),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    head.position.y = 0.7;
-    basicModel.add(head);
-    
-    // Torso (caja)
-    const torso = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5, 0.6, 0.25),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    torso.position.y = 0.15;
-    basicModel.add(torso);
-    
-    // Brazos
-    const leftArm = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.07, 0.07, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    leftArm.position.set(0.35, 0.15, 0);
-    leftArm.rotation.z = Math.PI / 2;
-    basicModel.add(leftArm);
-    
-    const rightArm = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.07, 0.07, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    rightArm.position.set(-0.35, 0.15, 0);
-    rightArm.rotation.z = Math.PI / 2;
-    basicModel.add(rightArm);
-    
-    // Piernas
-    const leftLeg = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.09, 0.09, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    leftLeg.position.set(0.15, -0.35, 0);
-    basicModel.add(leftLeg);
-    
-    const rightLeg = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.09, 0.09, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 })
-    );
-    rightLeg.position.set(-0.15, -0.35, 0);
-    basicModel.add(rightLeg);
-    
-    // Aplicar escala corporal global
-    basicModel.scale.set(bodyScale, bodyScale, bodyScale);
-    
-    // Añadir al grupo principal
-    group.current.add(basicModel);
-    
-    console.log('Usando modelo avatar básico construido con geometrías');
-    setModelLoaded(true);
-    
-    // Informar al usuario sobre el modelo básico
-    toast.info("Usando modelo básico de avatar. Modelo 3D no disponible.", {
-      duration: 4000,
-    });
-  };
-  
-  // Rotación del avatar
-  useFrame((state) => {
-    if (group.current) {
-      group.current.rotation.y = state.clock.getElapsedTime() * 0.15;
-    }
-  });
+  const [clothingMeshes, setClothingMeshes] = useState({});
+  const [fallbackMode, setFallbackMode] = useState(false);
 
-  // Efecto para aplicar escala corporal
   useEffect(() => {
-    if (group.current && group.current.children[0]) {
-      // Aplicar escala global
-      group.current.children[0].scale.set(
-        bodyScale,
-        bodyScale,
-        bodyScale
-      );
-    }
-  }, [bodyScale, hipSize, chestSize]);
-  
-  // Efecto para cargar y gestionar prendas
-  useEffect(() => {
-    if (!modelLoaded) return;
+    // Este efecto solo se ejecuta para configurar el modo de visualización
+    const timer = setTimeout(() => {
+      setModelLoaded(true);
+    }, 1000);
     
-    const newClothingMeshes = {...clothingMeshes};
-    
-    // Lista de prendas a mostrar u ocultar
-    const availableClothing = {
-      'shirt': 'shirt',
-      'pants': 'pants',
-      'shoes': 'shoes',
-      'glasses': 'glasses'
-    };
-    
-    // Mostrar/ocultar prendas según selección
-    Object.entries(availableClothing).forEach(([item]) => {
-      const shouldDisplay = outfitItems.includes(item);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Función para cargar modelo OBJ con sus materiales
+  const OrcModel = () => {
+    try {
+      // Intentamos cargar el modelo OBJ y sus materiales
+      const avatarMaterials = useLoader(MTLLoader, '/models/OrcIdle.mtl');
+      const avatar = useLoader(OBJLoader, '/models/OrcIdle.obj', (loader) => {
+        loader.setMaterials(avatarMaterials);
+      });
+
+      // Escalar y posicionar el avatar
+      avatar.scale.set(0.01, 0.01, 0.01);
       
-      // Si la prenda está seleccionada pero aún no está cargada
-      if (shouldDisplay && !newClothingMeshes[item]) {
-        // Creamos geometrías simples para las prendas
-        console.log(`Creando prenda: ${item}`);
-        loadClothingItem(item).then(mesh => {
-          if (mesh) {
-            newClothingMeshes[item] = mesh;
-            setClothingMeshes({...newClothingMeshes});
-          }
-        });
-      }
-      
-      // Mostrar/ocultar prendas ya cargadas
-      if (newClothingMeshes[item]) {
-        newClothingMeshes[item].visible = shouldDisplay;
-        
-        // Aplicar offsets configurados para esta prenda
-        if (shouldDisplay && clothingOffsets[item]) {
-          const { offsetY = 0, offsetX = 0, offsetZ = 0, scale = 1 } = clothingOffsets[item];
+      // Cargar la gorra si está seleccionada en outfitItems
+      if (outfitItems.includes('glasses')) {
+        try {
+          const capMaterials = useLoader(MTLLoader, '/models/Cap.mtl');
+          const cap = useLoader(OBJLoader, '/models/Cap.obj', (loader) => {
+            loader.setMaterials(capMaterials);
+          });
           
-          newClothingMeshes[item].position.y = offsetY;
-          newClothingMeshes[item].position.x = offsetX;
-          newClothingMeshes[item].position.z = offsetZ;
-          newClothingMeshes[item].scale.set(scale, scale, scale);
+          // Ajustar posición y escala de la gorra
+          cap.position.set(0, 1.75, 0);
+          cap.scale.set(0.1, 0.1, 0.1);
+          
+          // Añadir la gorra como hijo del avatar
+          avatar.add(cap);
+        } catch (error) {
+          console.error("Error al cargar la gorra:", error);
+          toast.error("No se pudo cargar la gorra");
         }
       }
-    });
-    
-  }, [outfitItems, clothingOffsets, modelLoaded]);
-  
-  // Función para crear una prenda usando geometrías básicas
-  const loadClothingItem = async (itemName) => {
-    try {
-      if (!group.current || !group.current.children[0]) return null;
       
-      const basicModel = group.current.children[0];
-      
-      // Crear geometrías según el tipo de prenda
-      const dummyGeometry = new THREE.BoxGeometry(0.4, 0.6, 0.3);
-      const material = new THREE.MeshStandardMaterial({ 
-        color: itemName === 'shirt' ? '#3b82f6' : 
-               itemName === 'pants' ? '#1e3a8a' : 
-               itemName === 'shoes' ? '#111827' : '#000000',
-        transparent: true,
-        opacity: 0.9
-      });
-      
-      // Crear un objeto que simule una malla
-      const mesh = new THREE.Mesh(dummyGeometry, material);
-      mesh.name = itemName;
-      
-      // Posicionar según el tipo de prenda y en relación al modelo
-      switch (itemName) {
-        case 'shirt':
-          mesh.position.set(0, 0.15, 0);
-          mesh.scale.set(1.1, 1.1, 1.1);
-          break;
-        case 'pants':
-          mesh.position.set(0, -0.35, 0);
-          mesh.scale.set(1, 1.2, 1);
-          break;
-        case 'shoes':
-          mesh.position.set(0, -0.6, 0.2);
-          mesh.scale.set(0.8, 0.3, 1.3);
-          break;
-        case 'glasses':
-          mesh.position.set(0, 0.7, 0.25);
-          mesh.scale.set(0.8, 0.2, 0.3);
-          break;
+      // Cargar camisa si está seleccionada
+      if (outfitItems.includes('shirt')) {
+        try {
+          // Aquí cargaríamos una camisa OBJ si existiera
+          // Por ahora es solo placerholder de código
+          console.log("Se cargaría la camisa OBJ aquí");
+          
+          // Ejemplo de posicionamiento para una camisa
+          // shirtModel.position.set(0, 0.8, 0);
+        } catch (error) {
+          console.error("Error al cargar la camisa:", error);
+        }
       }
       
-      // Añadir al grupo
-      basicModel.add(mesh);
+      // Aplicar escala global del cuerpo
+      if (bodyScale !== 1.0) {
+        avatar.scale.multiplyScalar(bodyScale);
+      }
       
-      console.log(`Prenda ${itemName} creada y añadida al avatar`);
-      return mesh;
+      // Actualizar estado
+      setModelLoaded(true);
+      setFallbackMode(false);
+      
+      // Rotar suavemente
+      useFrame((state) => {
+        if (avatar) {
+          avatar.rotation.y = state.clock.getElapsedTime() * 0.15;
+        }
+      });
+      
+      return <primitive object={avatar} />;
       
     } catch (error) {
-      console.error(`Error al crear la prenda ${itemName}:`, error);
-      toast.error(`Error al cargar ${itemName}`);
+      console.error("Error al cargar el modelo OBJ:", error);
+      setFallbackMode(true);
+      
+      // Informamos al usuario sobre el error
+      toast.error("No se pudo cargar el modelo 3D", {
+        description: "Usando avatar alternativo",
+        duration: 4000,
+      });
+      
+      // Devolvemos null para que se maneje el fallback
       return null;
     }
   };
-
-  // Devolvemos el grupo que contiene el avatar cargado
+  
+  // Modelo de fallback usando geometrías primitivas
+  const FallbackModel = () => {
+    const basicModel = useRef(new THREE.Group());
+    
+    useEffect(() => {
+      if (!basicModel.current) return;
+      
+      // Limpiar grupo
+      while (basicModel.current.children.length) {
+        basicModel.current.remove(basicModel.current.children[0]);
+      }
+      
+      // Crear modelo básico
+      // Cabeza (esfera)
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.25, 32, 32),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      head.position.y = 0.7;
+      basicModel.current.add(head);
+      
+      // Torso (caja)
+      const torso = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 0.6, 0.25),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      torso.position.y = 0.15;
+      basicModel.current.add(torso);
+      
+      // Brazos
+      const leftArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07, 0.07, 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      leftArm.position.set(0.35, 0.15, 0);
+      leftArm.rotation.z = Math.PI / 2;
+      basicModel.current.add(leftArm);
+      
+      const rightArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07, 0.07, 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      rightArm.position.set(-0.35, 0.15, 0);
+      rightArm.rotation.z = Math.PI / 2;
+      basicModel.current.add(rightArm);
+      
+      // Piernas
+      const leftLeg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09, 0.09, 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      leftLeg.position.set(0.15, -0.35, 0);
+      basicModel.current.add(leftLeg);
+      
+      const rightLeg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09, 0.09, 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x8d5524 })
+      );
+      rightLeg.position.set(-0.15, -0.35, 0);
+      basicModel.current.add(rightLeg);
+      
+      // Escalar modelo
+      basicModel.current.scale.set(bodyScale, bodyScale, bodyScale);
+      
+      // Añadir ropa seleccionada usando geometrías primitivas
+      if (outfitItems.includes('glasses')) {
+        // Simulamos una gorra con una caja
+        const cap = new THREE.Mesh(
+          new THREE.BoxGeometry(0.4, 0.1, 0.4),
+          new THREE.MeshStandardMaterial({ color: 0x3b82f6 })
+        );
+        cap.position.set(0, 0.9, 0);
+        basicModel.current.add(cap);
+      }
+      
+      if (outfitItems.includes('shirt')) {
+        // Simulamos una camisa
+        const shirt = new THREE.Mesh(
+          new THREE.BoxGeometry(0.55, 0.65, 0.3),
+          new THREE.MeshStandardMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.9 })
+        );
+        shirt.position.set(0, 0.15, 0);
+        basicModel.current.add(shirt);
+      }
+      
+      if (outfitItems.includes('pants')) {
+        // Simulamos un pantalón
+        const pants = new THREE.Mesh(
+          new THREE.BoxGeometry(0.35, 0.6, 0.25),
+          new THREE.MeshStandardMaterial({ color: 0x1e3a8a, transparent: true, opacity: 0.9 })
+        );
+        pants.position.set(0, -0.35, 0);
+        basicModel.current.add(pants);
+      }
+    }, [outfitItems, bodyScale]);
+    
+    // Rotación del modelo
+    useFrame((state) => {
+      if (basicModel.current) {
+        basicModel.current.rotation.y = state.clock.getElapsedTime() * 0.15;
+      }
+    });
+    
+    return <primitive object={basicModel.current} />;
+  };
+  
+  // Dependiendo del estado, mostramos el modelo OBJ o el fallback
   return (
     <AvatarContext.Provider value={{ clothingMeshes }}>
-      <group ref={group} position={[0, 0, 0]} />
+      <group ref={group} position={[0, 0, 0]}>
+        {fallbackMode ? <FallbackModel /> : <OrcModel />}
+      </group>
     </AvatarContext.Provider>
   );
 }
@@ -323,7 +320,8 @@ export function AvatarPreview({
   );
 }
 
-// Eliminar preload para evitar errores 404
+// Función de precarga modificada para OBJ y MTL
 export const preloadAvatarModels = () => {
-  console.log('Precarga de modelos desactivada para evitar errores 404');
+  console.log('Precargando modelos OBJ+MTL (desactivado por ahora para evitar errores 404)');
+  // Aquí se podría implementar precarga real cuando tengamos los archivos
 };
